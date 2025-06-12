@@ -1,0 +1,70 @@
+create database ecommerce_db;
+use ecommerce_db;
+create table online_sales(
+invoice_no varchar(20),
+stock_code varchar(20),
+description varchar(225),
+quantity int,
+invoice_date varchar(10),
+unit_price decimal(10,2),
+customer_id int,
+country varchar(100));
+insert into online_sales(invoice_no,stock_code,description,quantity,invoice_date,unit_price,customer_id,country) values
+(536370,21724,'PANDA AND BUNNIES STICKER SHEET',12,'12/1/2010',0.85,12583,'France'),
+(536370,21883,'STARS GIFT TAPE',24,'12/1/2010',0.65,12583,'France'),
+(536370,10002,'INFLATABLE POLITICAL GLOBE',48,'12/1/2010',0.85,12583,'France'),
+(536370,21791,'VINTAGE HEADS AND TAILS CARD GAME',24,'12/1/2010',1.25,12583,'France'),
+(536370,21035,'SET2 RED RETROSPOT TEA TOWELS',18,'12/1/2010',2.95,12583,'France'),
+(536370,22326,'ROUND SNACK BOXES SET OF4 WOODLAND',24,'12/1/2010',2.95,12583,'France'),
+(536370,22629,'SPACEBOY LUNCH BOX',24,'12/1/2010',1.95,12583,'France'),
+(536370,22659,'LUNCH BOX I LOVE LONDON',24,'12/1/2010',1.95,12583,'France'),
+(536370,22631,'CIRCUS PARADE LUNCH BOX',24,'12/1/2010',1.95,12583,'France'),
+(536370,22661,'CHARLOTTE BAG DOLLY GIRL DESIGN',20,'12/1/2010',0.85,12583,'France'),
+(536370,21731,'RED TOADSTOOL LED NIGHT LIGHT',24,'12/1/2010',1.65,12583,'France'),
+(536370,22900,'SET 2 TEA TOWELS I LOVE LONDON',24,'12/1/2010',2.95,12583,'France'),
+(536370,21913,'VINTAGE SEASIDE JIGSAW PUZZLES',12,'12/1/2010',3.75,12583,'France'),
+(536370,22540,'MINI JIGSAW CIRCUS PARADE',24,'12/1/2010',0.42,12583,'France'),
+(536370,22544,'MINI JIGSAW SPACEBOY',24,'12/1/2010',0.42,12583,'France'),
+(536370,22492,'MINI PAINT SET VINTAGE',36,'12/1/2010',0.65,12583,'France'),
+(536371,22086,'PAPER CHAIN KIT 50S CHRISTMAS',80,'12/1/2010',2.55,13748,'United Kingdom'),
+(536372,22632,'HAND WARMER RED POLKA DOT',6,'12/1/2010',1.85,17850,'United Kingdom'),
+(536372,22633,'HAND WARMER UNION JACK',6,'12/1/2010',1.85,1785,'United Kingdom'),
+(536373,85123,'WHITE HANGING HEART T-LIGHT HOLDER',6,'12/1/2010',2.55,17850,'United Kingdom'),
+(536373,71053,'WHITE METAL LANTERN',6,'12/1/2010',3.39,17850,'United Kingdom'),
+(536373,84406,'CREAM CUPID HEARTS COAT HANGER',8,'12/1/2010',2.75,17850	,'United Kingdom'),
+(536373,20679,'EDWARDIAN PARASOL RED',6,'12/1/2010',4.95,17850,'United Kingdom'),
+(536373,37370,'RETRO COFFEE MUGS ASSORTED',6,'12/1/2010',1.06,17850,'United Kingdom'),
+(536373,21871,'SAVE THE PLANET MUG',6,'12/1/2010',1.06,17850,'United Kingdom'),
+(536373,21071,'VINTAGE BILLBOARD DRINK ME MUG',6,'12/1/2010',1.06,17850,'United Kingdom'),
+(536373,21068,'VINTAGE BILLBOARD LOVE/HATE MUG',6,'12/1/2010',1.06,17850,'United Kingdom'),
+(536373,82483,'WOOD 2 DRAWER CABINET WHITE FINISH',2,'12/1/2010',4.95,17850,'United Kingdom'),
+(536373,82486,'WOOD S/3 CABINET ANT WHITE FINISh',4,'12/1/2010',6.95,17850,'United Kingdom'),
+(536373,82482,'WOODEN PICTURE FRAME WHITE FINISh',6,'12/1/2010',2.1,17850,'United Kingdom');
+select year(invoice_date) as year,
+month(invoice_date) as month,
+sum(unit_price) as total_sales
+from online_sales group by year,month
+order by year,month;
+SELECT a.invoice_no, a.stock_code, a.description, a.quantity, b.invoice_no AS related_invoice
+FROM online_sales a
+LEFT JOIN online_sales b ON a.stock_code = b.stock_code AND a.invoice_no <> b.invoice_no;
+SELECT stock_code, description, unit_price,
+    (SELECT MAX(unit_price) FROM online_sales WHERE stock_code = os.stock_code) AS max_unit_price
+FROM online_sales os;
+SELECT stock_code, description, quantity
+FROM online_sales
+WHERE quantity > (SELECT AVG(quantity) FROM online_sales);
+SELECT country, total_sales
+FROM (
+    SELECT country, COUNT(*) AS total_sales
+    FROM online_sales
+    GROUP BY country
+) AS sales_summary
+ORDER BY total_sales DESC;
+SELECT SUM(quantity * unit_price) AS total_revenue, AVG(unit_price) AS avg_price FROM online_sales;
+CREATE VIEW sales_summary AS
+SELECT invoice_no, stock_code, description, quantity, invoice_date, unit_price, customer_id, country
+FROM online_sales;
+SELECT * FROM sales_summary;
+CREATE INDEX idx_customer_date ON online_sales(customer_id, invoice_date);
+EXPLAIN SELECT * FROM online_sales WHERE customer_id = 12583;
